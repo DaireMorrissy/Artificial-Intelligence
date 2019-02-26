@@ -214,9 +214,31 @@ def uniformCostSearch(problem):
     ans = []
     visitedCoords = set()
     nodesToVisit = util.PriorityQueue()
-    print problem.getStartState()
+
     nodesToVisit.push((problem.getStartState(), [], 0), 0 )
+    ans = expand(problem, visitedCoords, nodesToVisit)
     # print "Start uniformCostSearch"
+    # while not nodesToVisit.isEmpty():
+    #     currentNode = nodesToVisit.pop()
+    #     if currentNode[0] in visitedCoords:
+    #         continue
+    #     visitedCoords.add(currentNode[0])
+    #     if problem.isGoalState(currentNode[0]):
+    #         ans = currentNode[1]
+    #         break
+    #     else:
+    #         for node in problem.getSuccessors(currentNode[0]):
+    #             if node[0] not in visitedCoords:
+    #                 route = currentNode[1][:]
+    #                 route.append(node[1])
+    #                 cost = currentNode[2] + node[2]
+    #                 print cost
+    #                 nodesToVisit.push((node[0], route, cost), cost)
+    # # problem, pos, path, cost, visitedCoords,
+    return ans
+    util.raiseNotDefined()
+
+def expand(problem, visitedCoords, nodesToVisit):
     while not nodesToVisit.isEmpty():
         currentNode = nodesToVisit.pop()
         if currentNode[0] in visitedCoords:
@@ -224,7 +246,7 @@ def uniformCostSearch(problem):
         visitedCoords.add(currentNode[0])
         if problem.isGoalState(currentNode[0]):
             ans = currentNode[1]
-            break
+            return ans
         else:
             for node in problem.getSuccessors(currentNode[0]):
                 if node[0] not in visitedCoords:
@@ -233,8 +255,9 @@ def uniformCostSearch(problem):
                     cost = currentNode[2] + node[2]
                     print cost
                     nodesToVisit.push((node[0], route, cost), cost)
-    return ans
-    util.raiseNotDefined()
+    # problem, pos, path, cost, visitedCoords,
+    return []
+
 
 def nullHeuristic(state, problem=None):
     """
