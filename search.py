@@ -87,99 +87,14 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    from game import Directions
-    n = Directions.NORTH
-    s = Directions.SOUTH
-    e = Directions.EAST
-    w = Directions.WEST
-
-    # Method 1
-    # ans = []
-    # found = False
-    # visited = []
-    # currentStatePos = problem.getStartState()
-    # ans, found = nextNode(problem, currentStatePos, visited)
-    # ans.reverse()
-
     ans = []
     visitedCoords = set()
     nodesToVisit = util.Stack()
 
     nodesToVisit.push((problem.getStartState(), []))
-    print "start depthFirstSearch"
-    while not nodesToVisit.isEmpty():
-        # print "Nodes to visit: " + nodesToVisit.self
-        currentNode = nodesToVisit.pop()
-        # print "Current Node: %s" % (currentNode,)
-        visitedCoords.add(currentNode[0])
-        if problem.isGoalState(currentNode[0]):
-            ans = currentNode[1]
-            # print "Goal state"
-            # print "Path "
-            # print ans
-            break
-        else:
-            for node in problem.getSuccessors(currentNode[0]):
-                if node[0] not in visitedCoords:
-                    # print "New Node: %s" % (node,)
-                    # print currentNode[1]
-                    # print currentNode[1]
-                    route = currentNode[1][:]
-                    # print route
-                    route.append(node[1])
-                    # print route
-                    # print "Route " + str(route)
-                    # print route
-                    nodesToVisit.push((node[0], route))
+    ans = expand(problem, visitedCoords, nodesToVisit, breadthFirstFunction, nullHeuristic)
 
-
-    # print ans, found
-    print "END"
-    print ans
     return ans
-    # return  [s, s, w, s, w, w, s, w]
-    util.raiseNotDefined()
-
-# def expandNode( problem, pos, route, visited):
-#     # is it the goal,
-#     if problem.isGoalState(pos):
-#         return route, True
-#     else:
-#         toVisit.push(problem.getSuccessors(pos))
-#         # print toVisit
-#     return [], False
-
-
-def nextNode(problem, currentStatePos, visited):
-    ans = []
-    if problem.isGoalState(currentStatePos):
-        return ans, True
-    else:
-        visited.append(currentStatePos)
-        # print "Visited list: ", visited
-        # print "Current location: ", currentStatePos
-        # print problem.getSuccessors(currentStatePos)
-
-        for node in problem.getSuccessors(currentStatePos):
-            found = False
-            for pos in visited:
-                if node[0] == pos:
-                    # print "help", node[0], pos
-                    found = True
-                    break
-            if found:
-                continue
-            currentState = node
-            ans, isGoal = nextNode(problem, currentState[0], visited)
-            # print "Answer: ", ans
-            # print type(ans)
-            # print currentState
-            if isGoal:
-                # print "test", currentState[1]
-                ans.append(currentState[1])
-                # print ans
-                return ans, True
-    return ans, False
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
@@ -190,23 +105,14 @@ def breadthFirstSearch(problem):
     nodesToVisit = util.Queue()
 
     nodesToVisit.push((problem.getStartState(), []))
-    # print "Start breadthFirstSearch"
-    while not nodesToVisit.isEmpty():
-        currentNode = nodesToVisit.pop()
-        if currentNode[0] in visitedCoords:
-            continue
-        visitedCoords.add(currentNode[0])
-        if problem.isGoalState(currentNode[0]):
-            ans = currentNode[1]
-            break
-        else:
-            for node in problem.getSuccessors(currentNode[0]):
-                if node[0] not in visitedCoords:
-                    route = currentNode[1][:]
-                    route.append(node[1])
-                    nodesToVisit.push((node[0], route))
+    ans = expand(problem, visitedCoords, nodesToVisit, breadthFirstFunction, nullHeuristic)
     return ans
     util.raiseNotDefined()
+
+def breadthFirstFunction(currentNode, nextNode, nodesToVisit, heuristic, problem):
+    route = currentNode[1][:]
+    route.append(nextNode[1])
+    nodesToVisit.push((nextNode[0], route))
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
@@ -216,29 +122,17 @@ def uniformCostSearch(problem):
     nodesToVisit = util.PriorityQueue()
 
     nodesToVisit.push((problem.getStartState(), [], 0), 0 )
-    ans = expand(problem, visitedCoords, nodesToVisit)
-    # print "Start uniformCostSearch"
-    # while not nodesToVisit.isEmpty():
-    #     currentNode = nodesToVisit.pop()
-    #     if currentNode[0] in visitedCoords:
-    #         continue
-    #     visitedCoords.add(currentNode[0])
-    #     if problem.isGoalState(currentNode[0]):
-    #         ans = currentNode[1]
-    #         break
-    #     else:
-    #         for node in problem.getSuccessors(currentNode[0]):
-    #             if node[0] not in visitedCoords:
-    #                 route = currentNode[1][:]
-    #                 route.append(node[1])
-    #                 cost = currentNode[2] + node[2]
-    #                 print cost
-    #                 nodesToVisit.push((node[0], route, cost), cost)
-    # # problem, pos, path, cost, visitedCoords,
+    ans = expand(problem, visitedCoords, nodesToVisit, uniformCostFunction, nullHeuristic)
     return ans
     util.raiseNotDefined()
 
-def expand(problem, visitedCoords, nodesToVisit):
+def uniformCostFunction(currentNode, nextNode, nodesToVisit, heuristic, problem):
+    route = currentNode[1][:]
+    route.append(nextNode[1])
+    cost = currentNode[2] + nextNode[2]
+    nodesToVisit.push((nextNode[0], route, cost), cost)
+
+def expand(problem, visitedCoords, nodesToVisit, methodToRun, heuristic):
     while not nodesToVisit.isEmpty():
         currentNode = nodesToVisit.pop()
         if currentNode[0] in visitedCoords:
@@ -250,12 +144,7 @@ def expand(problem, visitedCoords, nodesToVisit):
         else:
             for node in problem.getSuccessors(currentNode[0]):
                 if node[0] not in visitedCoords:
-                    route = currentNode[1][:]
-                    route.append(node[1])
-                    cost = currentNode[2] + node[2]
-                    print cost
-                    nodesToVisit.push((node[0], route, cost), cost)
-    # problem, pos, path, cost, visitedCoords,
+                    methodToRun(currentNode, node, nodesToVisit, heuristic, problem)
     return []
 
 
@@ -269,7 +158,21 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    ans = []
+    visitedCoords = set()
+    nodesToVisit = util.PriorityQueue()
+
+    nodesToVisit.push((problem.getStartState(), [], 0), heuristic(problem.getStartState(), problem) )
+    ans = expand(problem, visitedCoords, nodesToVisit, astarFunction, heuristic)
+    return ans
     util.raiseNotDefined()
+
+def astarFunction(currentNode, nextNode, nodesToVisit, heuristic, problem):
+    route = currentNode[1][:]
+    route.append(nextNode[1])
+    gn = currentNode[2] + nextNode[2]
+    hn = heuristic(nextNode[0], problem)
+    nodesToVisit.push((nextNode[0], route, gn), gn+hn)
 
 
 # Abbreviations
