@@ -73,56 +73,30 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 def depthFirstSearch(problem):
-    """
-    Search the deepest nodes in the search tree first.
-
-    Your search algorithm needs to return a list of actions that reaches the
-    goal. Make sure to implement a graph search algorithm.
-
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
-
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
-    """
+    """Search the deepest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    ans = []
-    visitedCoords = set()
-    nodesToVisit = util.Stack()
-
-    nodesToVisit.push((problem.getStartState(), []))
-    ans = expand(problem, visitedCoords, nodesToVisit, breadthFirstFunction, nullHeuristic)
-
+    ans = searchFunction(problem, util.Stack(), breadthFirstFunction, nullHeuristic)
     return ans
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    ans = []
-    visitedCoords = set()
-    nodesToVisit = util.Queue()
-
-    nodesToVisit.push((problem.getStartState(), []))
-    ans = expand(problem, visitedCoords, nodesToVisit, breadthFirstFunction, nullHeuristic)
+    ans = searchFunction(problem, util.Queue(), breadthFirstFunction, nullHeuristic)
     return ans
     util.raiseNotDefined()
 
 def breadthFirstFunction(currentNode, nextNode, nodesToVisit, heuristic, problem):
     route = currentNode[1][:]
     route.append(nextNode[1])
-    nodesToVisit.push((nextNode[0], route))
+    cost = currentNode[2] + nextNode[2]
+    nodesToVisit.push((nextNode[0], route, cost))
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    ans = []
-    visitedCoords = set()
-    nodesToVisit = util.PriorityQueue()
-
-    nodesToVisit.push((problem.getStartState(), [], 0), 0 )
-    ans = expand(problem, visitedCoords, nodesToVisit, uniformCostFunction, nullHeuristic)
+    costFunction = lambda x: x[2]
+    ans = searchFunction(problem, util.PriorityQueueWithFunction(costFunction), uniformCostFunction, nullHeuristic)
     return ans
     util.raiseNotDefined()
 
@@ -130,9 +104,11 @@ def uniformCostFunction(currentNode, nextNode, nodesToVisit, heuristic, problem)
     route = currentNode[1][:]
     route.append(nextNode[1])
     cost = currentNode[2] + nextNode[2]
-    nodesToVisit.push((nextNode[0], route, cost), cost)
+    nodesToVisit.push((nextNode[0], route, cost))
 
-def expand(problem, visitedCoords, nodesToVisit, methodToRun, heuristic):
+def searchFunction(problem, nodesToVisit, methodToRun, heuristic):
+    visitedCoords = set()
+    nodesToVisit.push((problem.getStartState(), [], 0))
     while not nodesToVisit.isEmpty():
         currentNode = nodesToVisit.pop()
         if currentNode[0] in visitedCoords:
@@ -141,10 +117,9 @@ def expand(problem, visitedCoords, nodesToVisit, methodToRun, heuristic):
         if problem.isGoalState(currentNode[0]):
             ans = currentNode[1]
             return ans
-        else:
-            for node in problem.getSuccessors(currentNode[0]):
-                if node[0] not in visitedCoords:
-                    methodToRun(currentNode, node, nodesToVisit, heuristic, problem)
+        for node in problem.getSuccessors(currentNode[0]):
+            if node[0] not in visitedCoords:
+                methodToRun(currentNode, node, nodesToVisit, heuristic, problem)
     return []
 
 
@@ -160,19 +135,19 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     "*** YOUR CODE HERE ***"
     ans = []
     visitedCoords = set()
-    nodesToVisit = util.PriorityQueue()
+    costFunction = lambda x: x[2] + heuristic(x[0], problem)
+    nodesToVisit = util.PriorityQueueWithFunction(costFunction)
 
-    nodesToVisit.push((problem.getStartState(), [], 0), heuristic(problem.getStartState(), problem) )
-    ans = expand(problem, visitedCoords, nodesToVisit, astarFunction, heuristic)
+    # nodesToVisit.push((problem.getStartState(), [], 0), heuristic(problem.getStartState(), problem) )
+    ans = searchFunction(problem, util.PriorityQueueWithFunction(costFunction), astarFunction, heuristic)
     return ans
     util.raiseNotDefined()
 
 def astarFunction(currentNode, nextNode, nodesToVisit, heuristic, problem):
     route = currentNode[1][:]
     route.append(nextNode[1])
-    gn = currentNode[2] + nextNode[2]
-    hn = heuristic(nextNode[0], problem)
-    nodesToVisit.push((nextNode[0], route, gn), gn+hn)
+    cost = currentNode[2] + nextNode[2]
+    nodesToVisit.push((nextNode[0], route, cost))
 
 
 # Abbreviations
