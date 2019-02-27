@@ -75,38 +75,41 @@ def tinyMazeSearch(problem):
 def depthFirstSearch(problem):
     """Search the deepest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    ans = searchFunction(problem, util.Stack(), breadthFirstFunction, nullHeuristic)
+    ans = searchFunction(problem, util.Stack())
     return ans
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    ans = searchFunction(problem, util.Queue(), breadthFirstFunction, nullHeuristic)
+    ans = searchFunction(problem, util.Queue())
     return ans
     util.raiseNotDefined()
-
-def breadthFirstFunction(currentNode, nextNode, nodesToVisit, heuristic, problem):
-    route = currentNode[1][:]
-    route.append(nextNode[1])
-    cost = currentNode[2] + nextNode[2]
-    nodesToVisit.push((nextNode[0], route, cost))
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
     costFunction = lambda x: x[2]
-    ans = searchFunction(problem, util.PriorityQueueWithFunction(costFunction), uniformCostFunction, nullHeuristic)
+    ans = searchFunction(problem, util.PriorityQueueWithFunction(costFunction))
     return ans
     util.raiseNotDefined()
 
-def uniformCostFunction(currentNode, nextNode, nodesToVisit, heuristic, problem):
-    route = currentNode[1][:]
-    route.append(nextNode[1])
-    cost = currentNode[2] + nextNode[2]
-    nodesToVisit.push((nextNode[0], route, cost))
+def nullHeuristic(state, problem=None):
+    """
+    A heuristic function estimates the cost from the current state to the nearest
+    goal in the provided SearchProblem.  This heuristic is trivial.
+    """
+    return 0
 
-def searchFunction(problem, nodesToVisit, methodToRun, heuristic):
+def aStarSearch(problem, heuristic=nullHeuristic):
+    """Search the node that has the lowest combined cost and heuristic first."""
+    "*** YOUR CODE HERE ***"
+    costFunction = lambda x: x[2] + heuristic(x[0], problem)
+    ans = searchFunction(problem, util.PriorityQueueWithFunction(costFunction))
+    return ans
+    util.raiseNotDefined()
+
+def searchFunction(problem, nodesToVisit):
     visitedCoords = set()
     nodesToVisit.push((problem.getStartState(), [], 0))
     while not nodesToVisit.isEmpty():
@@ -119,35 +122,11 @@ def searchFunction(problem, nodesToVisit, methodToRun, heuristic):
             return ans
         for node in problem.getSuccessors(currentNode[0]):
             if node[0] not in visitedCoords:
-                methodToRun(currentNode, node, nodesToVisit, heuristic, problem)
+                route = currentNode[1][:]
+                route.append(node[1])
+                cost = currentNode[2] + node[2]
+                nodesToVisit.push((node[0], route, cost))
     return []
-
-
-def nullHeuristic(state, problem=None):
-    """
-    A heuristic function estimates the cost from the current state to the nearest
-    goal in the provided SearchProblem.  This heuristic is trivial.
-    """
-    return 0
-
-def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    ans = []
-    visitedCoords = set()
-    costFunction = lambda x: x[2] + heuristic(x[0], problem)
-    nodesToVisit = util.PriorityQueueWithFunction(costFunction)
-
-    # nodesToVisit.push((problem.getStartState(), [], 0), heuristic(problem.getStartState(), problem) )
-    ans = searchFunction(problem, util.PriorityQueueWithFunction(costFunction), astarFunction, heuristic)
-    return ans
-    util.raiseNotDefined()
-
-def astarFunction(currentNode, nextNode, nodesToVisit, heuristic, problem):
-    route = currentNode[1][:]
-    route.append(nextNode[1])
-    cost = currentNode[2] + nextNode[2]
-    nodesToVisit.push((nextNode[0], route, cost))
 
 
 # Abbreviations
