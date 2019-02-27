@@ -40,6 +40,7 @@ from game import Actions
 import util
 import time
 import search
+from copy import deepcopy
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -374,23 +375,45 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    # print "Start"
-    # print state
-    # print problem.goal
-    # return manhattanHeuristic(state[0], problem) # Default to trivial solution
-    # return 0
+    min = 10000000
+    if len(state[1]) == 0:
+        min = 0
+    minIndex = 0
     sum = 0
-    # x = len(state[1]-1)
+
+    copyCorners = []
+    for i in state[1]:
+        copyCorners.append(i)
+
     for i in range(len(state[1])):
-        if len(state[1]) == 1:
-            break
-        sum += util.manhattanDistance(state[1][i], state[1][(i+1)%(len(state[1])-1)])
+        v = util.manhattanDistance(state[0], state[1][i])
+        if v < min:
+            min = v
+            minIndex = i
+    sum += min
+
+    while len(copyCorners) > 1:
+        currentValue = copyCorners[minIndex]
+        copyCorners.remove(currentValue)
+        min = 10000000
+        for i in range(len(copyCorners)):
+            v = util.manhattanDistance(currentValue, copyCorners[i])
+            if v < min:
+                min = v
+                minIndex = i
+        sum += min
+
+
+    # for i in range(len(state[1])):
+    #     if len(state[1]) == 1:
+    #         break
+    #     sum += util.manhattanDistance(state[1][i], state[1][(i+1)%(len(state[1])-1)])
     # util.manhattanDistance(state[1][1], state[1][2])
     # util.manhattanDistance(state[1][2], state[1][3])
     # util.manhattanDistance(state[1][3], state[1][0])
 
     # util.manhattanDistance(state[0], corners[0])
-
+    # print sum
     return sum
 
 
